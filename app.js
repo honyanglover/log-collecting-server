@@ -2,19 +2,70 @@ const express = require('express');
 const app = express();
 const PORT = 80;
 
-app.use(express.static(__dirname + '/public'));
+const fs = require('fs');
+const path = require('path');
+
+
+const getDate = time => {
+    let date = '';
+    const hours = time.getHours();
+
+    date += time.getFullYear() - 2000;
+    date += time.getMonth() + 1;
+    date += time.getDate();
+    date += '-';
+    date += hours >= 10 ? hours : `0${hours}`;
+
+    return date;
+};
+
+const writeLog = (filePath, data, cb) => fs.writeFile(filePath, JSON.stringify(data), 'utf8', cb);
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname + '/public'));
 
-app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/views/index.html');
-});
 
 app.post('/', (req, res) => {
-    console.log('request url:', req.path);
-    console.log(req.body);
-    res.sendStatus(200);
+    const now = new Date();
+    const date = getDate(now);
+    const data = { time: now, body: req.body };
+
+    let filePath = __dirname;
+
+    const mkdir = adding => {
+        filePath = path.join(filePath, adding);
+        if (!fs.existsSync(filePath)) {
+            fs.mkdirSync(filePath);
+        }
+    };
+
+    const endCallback = err => {
+        if (err) {
+            console.error(err);
+            res.sendStatus(500);
+        } else {
+            res.sendStatus(200);
+        }
+    };
+
+    mkdir('logs');
+    mkdir(date.split('-')[0]);
+    filePath = path.join(filePath, `${date}.json`);
+
+    if (fs.existsSync(filePath)) {
+        fs.readFile(filePath, (err, json) => {
+            if (err) {
+                console.error(err);
+                res.sendStatus(500);
+            } else {
+                writeLog(filePath, [...JSON.parse(json), data], endCallback);
+            }
+        });
+    } else {
+        writeLog(filePath, [data], endCallback);
+    }
 });
 
 app.listen(PORT, () => console.log(`Connected ${PORT} port!`));
