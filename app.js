@@ -12,6 +12,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/', (req, res) => {
+    console.log('request url:', req.path);
     console.log(req.body);
     res.sendStatus(200);
 });
