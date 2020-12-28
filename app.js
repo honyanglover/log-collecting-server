@@ -11,9 +11,9 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/index.html');
 });
 
-app.post('/test', (req, res) => {
+app.post('/', (req, res) => {
     console.log(req.body);
-    res.send({ code: 200 });
+    res.sendStatus(200);
 });
 
 app.listen(PORT, () => console.log(`Connected ${PORT} port!`));
