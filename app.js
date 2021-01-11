@@ -8,13 +8,13 @@ const path = require('path');
 
 const getDate = time => {
     let date = '';
-    const hours = time.getHours();
+    const setPlace = n => n >= 10 ? n : `0${n}`;
 
     date += time.getFullYear() - 2000;
-    date += time.getMonth() + 1;
-    date += time.getDate();
+    date += setPlace(time.getMonth() + 1);
+    date += setPlace(time.getDate());
     date += '-';
-    date += hours >= 10 ? hours : `0${hours}`;
+    date += setPlace(time.getHours());
 
     return date;
 };
